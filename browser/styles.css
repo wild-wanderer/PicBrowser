@@ -1,0 +1,65 @@
+
+body {
+    background-color: black;
+    color: white;
+    margin: 0;
+}
+
+#label {
+    padding: 50px 20px;
+}
+
+.post {
+    height: 100vh;
+    position: relative;
+}
+
+.centered {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    margin: 0 auto;
+    width: fit-content;
+}
+
+.line {
+    margin: auto;
+    width: fit-content;
+}
+
+img {
+    max-height: 100vh;
+    vertical-align: middle;
+    margin: 1px;
+}
+
+.info {
+    position: absolute;
+    top: 5px;
+    left: 5px;
+    z-index: 10;
+    background: #00000080;
+    padding: 5px 14px 5px 5px;
+    border-radius: 3px;
+}
+
+.info img {
+    border-radius: 5px;
+    width: 32px;
+    margin-right: 10px;
+}
+
+.pager {
+    position: absolute;
+    top: 5px;
+    right: 5px;
+    z-index: 10;
+    background: #00000080;
+    padding: 5px 14px 5px 5px;
+    border-radius: 3px;
+}
+
+.pager:not([date-set]) {
+    cursor: pointer;
+}

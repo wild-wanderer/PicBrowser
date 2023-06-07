@@ -1,0 +1,28 @@
+{
+    "name": "Pic Browser",
+    "version": "1.0",
+    "manifest_version": 3,
+    "content_scripts": [
+        {
+            "matches": [ "*://*/*" ],
+            "js": [ "opener.js" ]
+        }
+    ],
+    "action": {
+        "default_title": "Browse pictures",
+        "default_icon": {
+            "64": "img/icon.png"
+        }
+    },
+    "background": {
+        "service_worker": "action.js"
+    },
+    "permissions": [
+        "tabs",
+        "activeTab",
+        "scripting"
+    ],
+    "host_permissions": [
+        "*://*/*"
+    ]
+}
