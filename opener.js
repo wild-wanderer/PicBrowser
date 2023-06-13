@@ -1,8 +1,10 @@
 javascript:
 var cursorPos;
 
+const BACKGROUND_TAB = 'background_tab';
+
 function init() {
-    document.addEventListener('keyup', onKeyUp);
+    document.addEventListener('keyup', onKeyUp, {capture: true});
     document.addEventListener('mousemove', e => {
         cursorPos = { 
             x: e.clientX, 
@@ -34,7 +36,7 @@ function onKeyUp(event) {
     console.log(imgs);
 
     const img = imgs[0];
-    let src = first(img.src, img.href?.baseVal, img.currentSrc);    // img.poster;  Video's thumbnail
+    let src = first(img?.src, img?.href?.baseVal, img?.currentSrc);    // img.poster;  Video's thumbnail
 
     if (!src) {
         console.log('Source not found');
@@ -72,8 +74,8 @@ function getLargeUrl(urlStr) {
 
     // Adobe Stock
     else if (host.endsWith("ftcdn.net")) {
-        if (!path.endsWith('.mp4'))
-            url.pathname = path.replace(/\/\d{3}_F_/, "/1000_F_");
+        const size = path.endsWith('.mp4') ? 700 : 1000;
+        url.pathname = path.replace(/\/\d{3}_F_/, '/' + size + '_F_');
     }
 
     // Alamy
@@ -83,8 +85,8 @@ function getLargeUrl(urlStr) {
     }
 
     // Deposit Photos
-    else if (host == "st3.depositphotos.com") {
-        url.pathname = path.replace(/\/i\/\d+\//, "/i/1600/");
+    else if (host.endsWith(".depositphotos.com")) {
+        url.pathname = path.replace(/\/i\/\d{3}\//, "/i/950/");
     }
 
     // DreamsTime
@@ -111,8 +113,10 @@ function getLargeUrl(urlStr) {
     }
 
     // I Stock Photo
-    else if (host == "media.istockphoto.com") {
-        url.search = "?s=2048x2048";
+    else if (host == 'media.istockphoto.com') {
+        const [match, prefix, id, postfix] = /(-id|\/id\/)(\d+)($|\/)/.exec(path);
+        url.pathname = '/photos/p-id' + id;
+        url.search = '?s=2048x2048';
     }
 
     // Shutter Stock
@@ -121,10 +125,7 @@ function getLargeUrl(urlStr) {
         url.pathname = "/shutterstock/photos/" + id + "/display_1500/" + id + ext;
     }
 
-    else {
-        return urlStr;
-    }
-
+    url.hash = BACKGROUND_TAB;
     return url.toString();
 }
 

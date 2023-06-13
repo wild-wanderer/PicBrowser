@@ -11,7 +11,7 @@ var initializeBase = function() {
     $(window).resize(() => $('.centered').each((i, c) => arrangeGallery(c)));
 };
 
-var addPost = function(urls) {
+var addPost = function(urls, isVideo = false) {
     if (jQuery.type(urls) === "string")
         urls = [urls];
 
@@ -48,7 +48,8 @@ var addPost = function(urls) {
                        + 'max-width: calc((100vw - 25px) / ' + urlGroups[n].length + ' - 2px);'
 
             var a = $('<a>', { href: urlGroups[n][i] }).appendTo(line);
-            var img = $('<img>', { src: urlGroups[n][i], style: styles}).appendTo(a);
+            const tag = isVideo ? '<video>' : '<img>'
+            var img = $(tag, { src: urlGroups[n][i], style: styles}).appendTo(a);
             if (isGallery)
                 img.on("load", () => arrangeGallery(centered));
             else 

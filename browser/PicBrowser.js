@@ -1,4 +1,4 @@
-/// <reference path="./jquery-3.6.4.js" />
+/// <reference path="../jquery-3.6.4.js" />
 
 
 var startPicBrowser = function() {
@@ -18,7 +18,7 @@ var startPicBrowser = function() {
 
 
     if (isImg) {
-        startGeneric(url);
+        iterateOverUrlId(url);
     }
     else if (host == "navratdoreality.cz") {
         StartNDR(url);
@@ -29,11 +29,31 @@ var startPicBrowser = function() {
     else if (host.endsWith('depositphotos.com')) {
         startDepositPhotos(url);
     }
-
     else {
-        alert("No handler defined for " + host);
-        return;
+        openVisiblePictures();
     }
+}
+
+
+
+function openVisiblePictures() {
+    let pictures = [...document.querySelectorAll('img, image, video')];
+
+    /* Calculate the areas, and Exclude smallest images */
+    pictures = pictures.filter(img => {
+        const rect = img.getBoundingClientRect();
+        img.area = rect.width * rect.height;
+        return img.area > 1000;
+    });
+
+    pictures
+        .sort((a, b) => b - a)
+        .forEach((idx, pic) => {
+            const src = first(pic?.src, pic?.href?.baseVal, pic?.currentSrc);
+            if (!src.startsWith('blob:'))
+                addPost(src);
+        });
+
 }
 
 
@@ -147,24 +167,24 @@ function getHtml(url, handler) {
 
 
 
-var startGeneric = function(url) {
+var iterateOverUrlId = function(url) {
     $('body').prepend($('<input>', { type: 'button', id: 'btn', value: 'Go' }));
     $('body').prepend($('<input>', { type: 'url', id: 'postfix', placeholder: 'Postfix (optional)' }));
     $('body').prepend($('<input>', { type: 'url', id: 'url', placeholder: 'Url' }));
     $('#url').val(url);
 
-    $('#btn').click(loadGenericPics);
+    $('#btn').click(loadByUrlId);
     $('input').keyup(function(event) {
         if (event.keyCode === 13) {
             event.preventDefault();
-            loadGenericPics();
+            loadByUrlId();
         }
     });
 
-    loadGenericPics();
+    loadByUrlId();
 }
 
-var loadGenericPics = function() {
+var loadByUrlId = function() {
     $('#list').children().remove();
 
     var url = $('#url').val();
@@ -178,10 +198,10 @@ var loadGenericPics = function() {
         }
 
         for (var i = 0; i < 10; i++) {
-            addGenericImg(url + i + postfix);
+            addImgByUrlId(url + i + postfix);
         }
         for (var i = 0; i < 26; i++) {
-            addGenericImg(url + String.fromCharCode(65 + i) + postfix);
+            addImgByUrlId(url + String.fromCharCode(65 + i) + postfix);
         }
     }
     else {
@@ -197,22 +217,22 @@ var loadGenericPics = function() {
 
         if (number.length === 1) {
             for (let i = 0; i < 100; i++) {
-                addGenericImg(urlPrefix + i + postfix);
+                addImgByUrlId(urlPrefix + i + postfix);
             }
         }
         else if (number.length === 2) {
             for (let i = 0; i < 10; i++) {
-                addGenericImg(urlPrefix + '0' + i + postfix);
+                addImgByUrlId(urlPrefix + '0' + i + postfix);
             }
             let start = number.at(0) === '0' ? 10 : 0;
             for (let i = start; i < 100; i++) {
-                addGenericImg(urlPrefix + i + postfix);
+                addImgByUrlId(urlPrefix + i + postfix);
             }
         }
         else {
             let numberPrefix = number.slice(0, -2);
             for (let i = 0; i < 100; i++) {
-                addGenericImg(urlPrefix + numberPrefix + String(i).padStart(2, '0') + postfix);
+                addImgByUrlId(urlPrefix + numberPrefix + String(i).padStart(2, '0') + postfix);
             }
         }
     }
@@ -220,7 +240,7 @@ var loadGenericPics = function() {
 
 
 
-var addGenericImg = function(url) {
+var addImgByUrlId = function(url) {
     var postDiv = addPost([url]);
     $(postDiv).find('img')[0].onerror = event => {
         $(event.target).closest('.post').remove();
