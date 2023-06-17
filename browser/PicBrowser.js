@@ -30,30 +30,50 @@ var startPicBrowser = function() {
         startDepositPhotos(url);
     }
     else {
-        openVisiblePictures();
+        openVisiblePictures(url);
     }
 }
 
 
 
-function openVisiblePictures() {
-    let pictures = [...document.querySelectorAll('img, image, video')];
+function openVisiblePictures(url) {
+    getHtml(url, html => {
+        html.find('img, image, video')
+            .each((idx, pic) => {
+                let link = pic.closest('a')?.href;
+                const isPicLink = link && new URL(link).pathname.match(/\w\.\w{2,4}$/);
+                let src = isPicLink ? link : null;
 
-    /* Calculate the areas, and Exclude smallest images */
-    pictures = pictures.filter(img => {
-        const rect = img.getBoundingClientRect();
-        img.area = rect.width * rect.height;
-        return img.area > 1000;
+                src ??= first(
+                    $(pic).attr('src'), 
+                    $(pic)[0].href?.src,
+                    $(pic).attr('currentSrc'), 
+                    $(pic).attr('data-src')
+                );
+
+                if (!src || src.startsWith('blob:'))
+                    return;
+
+                if (src.startsWith('/')) {
+                    let _url = new URL(url);
+                    src = _url.protocol + '//' + _url.host + src;
+                }
+
+                const isVideo = pic.tagName.toLowerCase() === 'video';
+                var postDiv = addPost(src, isVideo);
+                pic = $(postDiv).find('img, video')[0];
+                pic.onerror = event => {
+                    $(event.target).closest('.post').remove();
+                };
+                pic.onload = event => {
+                    const pic = event.target;
+                    const rect = pic.getBoundingClientRect();
+                    if (rect.width * rect.height < 100000) {
+                        pic.closest('.post').remove();
+                    }
+                }
+            });
     });
-
-    pictures
-        .sort((a, b) => b - a)
-        .forEach((idx, pic) => {
-            const src = first(pic?.src, pic?.href?.baseVal, pic?.currentSrc);
-            if (!src.startsWith('blob:'))
-                addPost(src);
-        });
-
 }
 
 
@@ -84,7 +104,11 @@ var start4Archive = function(url) {
             var imgUrls = respHtml.find('.thread a.fileThumb').map((i, a) => a.href);
 
             imgUrls.each((index, url) => {
-                if (url != 'https://i.imgur.com/removed.png')
+                const src_404 = [
+                    'https://4chanarchives.com/image/image-404.png',
+                    'https://i.imgur.com/removed.png'
+                ]
+                if (!src_404.includes(url))
                     addPost(url);
             });
         },
@@ -256,6 +280,14 @@ function addImg(url, altUrl) {
         a.attr('href', altUrl);
     };
 }
+
+
+
+
+function first(...strings) {
+    return strings.filter(str => str)[0];
+}
+
 
 
 
