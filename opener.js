@@ -1,30 +1,32 @@
 javascript:
-var cursorPos;
+var pointerDisabled = false;
 
-const BACKGROUND_TAB = 'background_tab';
 
 function init() {
-    document.addEventListener('keyup', onKeyUp, {capture: true});
-    document.addEventListener('mousemove', e => {
-        cursorPos = { 
-            x: e.clientX, 
-            y: e.clientY 
-        };
-    });
+    document.addEventListener('mousedown', onMouseDown);
+    document.addEventListener('mouseup', onMouseUp);
 }
 
 
-function onKeyUp(event) {
-    if (event.key !== 'F2')
+/**@param {MouseEvent} event */
+function onMouseDown(event) {
+    if (event.altKey && event.button < 2) {
+        pointerDisabled = true;
+        document.body.classList.add('pointer-disabled');
+    }
+}
+
+
+/**@param {MouseEvent} event */
+function onMouseUp(event) {
+    if (!pointerDisabled || event.button > 1)
         return;
 
     event.preventDefault();
-    event.stopPropagation();
-
-    if (!cursorPos.x)
-        return;
-
-    let elements = document.elementsFromPoint(cursorPos.x, cursorPos.y);
+    document.body.classList.remove('pointer-disabled');
+    pointerDisabled = false;
+    
+    let elements = document.elementsFromPoint(event.clientX, event.clientY);
     let imgs = elements.filter(el => { 
         const tag = el.tagName.toLowerCase();
         return ['img', 'image', 'video'].includes(tag);
@@ -36,8 +38,18 @@ function onKeyUp(event) {
     console.log(imgs);
 
     const img = imgs[0];
-    let src = first(img?.src, img?.href?.baseVal, img?.currentSrc);    // img.poster;  Video's thumbnail
+    if (!img) {
+        console.log('No picture found');
+        return;
+    }
 
+    let link = img.closest('a')?.href;
+    const isPicLink = link && new URL(link).pathname.match(/\w\.\w{2,4}$/);
+    let src = isPicLink ? link : null;
+    if (isPicLink)
+        console.log("Found link to the picture: " + link);
+
+    src ??= first(img.src, img.href?.baseVal, img.currentSrc);    // img.poster;  Video's thumbnail
     if (!src) {
         console.log('Source not found');
         return;
@@ -45,8 +57,11 @@ function onKeyUp(event) {
 
     /* Open image / video, if it's not a blob */
     if (!src.startsWith('blob:')) {
-        window.open(getLargeUrl(src), '_blank');
-        focus();
+        const largeSrc = getLargeUrl(src);
+        if (event.button === 0) 
+            location.href = largeSrc;
+        else 
+            window.open(largeSrc, '_blank');
         return;
     } 
 
@@ -125,7 +140,10 @@ function getLargeUrl(urlStr) {
         url.pathname = "/shutterstock/photos/" + id + "/display_1500/" + id + ext;
     }
 
-    url.hash = BACKGROUND_TAB;
+    else {
+        return urlStr;
+    }
+
     return url.toString();
 }
 
