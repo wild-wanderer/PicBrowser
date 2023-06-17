@@ -27,29 +27,29 @@ function onMouseUp(event) {
     pointerDisabled = false;
     
     let elements = document.elementsFromPoint(event.clientX, event.clientY);
-    let imgs = elements.filter(el => { 
+    let pics = elements.filter(el => { 
         const tag = el.tagName.toLowerCase();
         return ['img', 'image', 'video'].includes(tag);
     });
 
     console.log('All the elements under the cursor:');
     console.log(elements);
-    console.log('All the images under the cursor (only the 1st was opend):');
-    console.log(imgs);
+    console.log('All the pictures under the cursor (only the 1st was opend):');
+    console.log(pics);
 
-    const img = imgs[0];
-    if (!img) {
+    const pic = pics[0];
+    if (!pic) {
         console.log('No picture found');
         return;
     }
 
-    let link = img.closest('a')?.href;
+    let link = pic.closest('a')?.href;
     const isPicLink = link && new URL(link).pathname.match(/\w\.\w{2,4}$/);
     let src = isPicLink ? link : null;
     if (isPicLink)
         console.log("Found link to the picture: " + link);
 
-    src ??= first(img.src, img.href?.baseVal, img.currentSrc);    // img.poster;  Video's thumbnail
+    src ??= first(pic.src, pic.href?.baseVal, pic.currentSrc);    // pic.poster;  Video's thumbnail
     if (!src) {
         console.log('Source not found');
         return;
