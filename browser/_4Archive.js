@@ -13,8 +13,9 @@ class _4Archive {
 
             var imgUrls = html
                 .find('.thread a.fileThumb')
-                .map((i, a) => a['href'])
-                .filter((i, src) => !src_404.includes(src));
+                .toArray()
+                .map(a => ({ src: a['href'] }))
+                .filter(post => !src_404.includes(post.src));
 
             PicB.addPosts(imgUrls, { onLoad: this.onLoad });
         });

@@ -1,5 +1,7 @@
 
 class IMX {
+
+    /** @param {string} url */
     static start(url) {
         document.title = 'IMX Browser';
     
@@ -33,14 +35,14 @@ class IMX {
         PicB.get(galleryUrl, galleryHtml => {
             let imgUrls = galleryHtml
                 .find('a img.imgtooltip')
-                .map((idx, img) => img['src']);
+                .toArray()
+                .map(img => ({
+                    src: img['src'],
+                    href: img['src']?.replace('/t/', '/i/')
+                }));
 
-            PicB.addPostsOneByOne([...imgUrls], 1, 0);
+            PicB.addPostsOneByOne(imgUrls, 1, 200);
         });
     }
-
-    /** @param {string} thumbUrl */
-    static largeSrc(thumbUrl) {
-        return thumbUrl.replace('/t/', '/i/');
-    }
+    
 }

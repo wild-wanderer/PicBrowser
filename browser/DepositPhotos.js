@@ -10,19 +10,20 @@ class DepositPhotos {
         this.offset = match ? parseInt(match[1]) : 0;
 
         PicB.get(url, html => {
-            let imgUrls = html
+            let posts = html
                 .find('section.file-container img')
-                .map((i, img) =>
-                    $(img).attr('src') ?? 
-                    $(img).attr('data-src') ?? 
-                    alert('img.src not found')
-                );
+                .toArray()
+                .map(img => {
+                    let url = $(img).attr('src') ?? $(img).attr('data-src');
+                    let largeUrl = url.replace(/\/i\/\d+\//, '/i/1600/');
+                    let mediumUrl = url.replace(/\/i\/\d+\//, '/i/950/');
+                    return { 
+                        src: largeUrl, 
+                        altUrls: [ mediumUrl, url ] 
+                    };
+                });
 
-            imgUrls.each((idx, url) => {
-                let largeUrl = url.replace(/\/i\/\d+\//, '/i/1600/');
-                let mediumUrl = url.replace(/\/i\/\d+\//, '/i/950/');
-                PicB.addPosts(largeUrl, { altUrls: [ mediumUrl, url ] });
-            });
+            PicB.addPosts(posts);
 
             $('#label').text('Page with offset = ' + this.offset + ' was loaded. Press num-pad left / right for more.');
         });
@@ -53,14 +54,4 @@ class DepositPhotos {
         location.search += joint + param;
     };
 
-}
-
-function addImg(url, altUrl) {
-    var postDiv = addPost(url);
-    $(postDiv).find('img')[0].onerror = event => {
-        let img = $(event.target);
-        let a = img.closest('a');
-        img.attr('src', altUrl);
-        a.attr('href', altUrl);
-    };
 }

@@ -2,8 +2,19 @@
 class PicB {
     static initialized = false;
     static prevScrollTime = 0;
-    static urlsQueue = [];
     static errorDelay = 0;
+    
+    static domParser = new DOMParser();
+
+
+    /**
+     * @type {{
+     *   src: string;
+     *   href?: string;
+     *   altUrls?: string[]
+     * }[]} 
+     */  
+    static postsQueue = [];
 
 
     static start() {
@@ -29,7 +40,7 @@ class PicB {
             IMX.start(url);
         }
         else if (isImg) {
-            iterateOverUrlId(url);
+            IterateOverId.start(url);
         }
         else if (host == "navratdoreality.cz") {
             NavratDoReality.start(url);
@@ -41,44 +52,44 @@ class PicB {
             DepositPhotos.start(url);
         }
         else {
-            openVisiblePictures(url);
+            VisiblePictures.open(url);
         }
     }
 
 
 
     /**
-     * @param {string|string[]} urls 
+     * @param {{
+     *   src: string;
+     *   href?: string;
+     *   altUrls?: string[]
+     * }[]} posts 
      */
-    static addPosts(urls, options = {}) {
-        if (urls instanceof jQuery) {
-            // @ts-ignore
-            urls = [...urls];
-        }
-        else if (!Array.isArray(urls)) {
-            urls = [urls];
-        }
-
+    static addPosts(posts, options = {}) {
         let list = $('#list');
 
-        urls.forEach(url => {
+        posts.forEach(post => {
             var postDiv = $('<div>', { class: 'post' }).appendTo(list);
 
             const tag = options.isVideo ? '<video>' : '<img>'
-            var img = $(tag, { src: url })
+            var img = $(tag, { 
+                src: post.src,
+                href: post.href
+            });
 
             if (options.onLoad)
                 img.one('load', options.onLoad);
 
-            if (options.onError || Array.isArray(options.altUrls)) 
-                img.one('error', () => this.onError(img, options));
+            if (options.onError || Array.isArray(post.altUrls)) 
+                img.one('error', ev => this.onError(ev, img, post.altUrls, options.onError));
             
 
             img.on('mouseup', ev => {
                 if (ev.button >= 2)
                     return;
                 
-                window.open(ev.target['src'], '_blank');
+                let img = ev.target
+                window.open(img.getAttribute('href') ?? img['src'], '_blank');
             })
             img.appendTo(postDiv);
         });
@@ -88,40 +99,47 @@ class PicB {
 
     /**
      * @param {JQuery<HTMLElement>} img
-     * @param {{ altUrls?: string[]; onError?: any; }} options
+     * @param {string[]} [altUrls]
+     * @param {(Event) => void} [onError]
      */
-    static onError(img, options) {
-        if (options.altUrls?.length) {
-            let altUrl = options.altUrls.shift();
-            img.one('error', () => this.onError(img, options));
+    static onError(ev, img, altUrls, onError) {
+        if (altUrls?.length) {
+            let altUrl = altUrls.shift();
+            img.one('error', () => this.onError(ev, img, altUrls, onError));
             img.attr('src', altUrl);
             img.closest('a').attr('href', altUrl);
         }
-        else if (options.onError) {
-            options.onError();
+        else if (onError) {
+            onError(ev);
         }
     }
 
 
     
-    /** @param {string[]} urls */
-    static addPostsOneByOne(urls, connectionsCount = 1, errorDelay = 1000) {
+    /**
+     * @param {{
+    *   src: string;
+    *   href?: string;
+    *   altUrls?: string[]
+    * }[]} posts 
+    */
+    static addPostsOneByOne(posts, connectionsCount = 1, errorDelay = 1000) {
         this.errorDelay = errorDelay;
-        if (urls)
-            PicB.urlsQueue.push(...urls);
+        if (posts)
+            PicB.postsQueue.push(...posts);
 
         let hub = $('#hub');
         if (!hub.length)
             hub = $('<div>', { id: 'hub' }).appendTo($('body'));
-        hub.text(PicB.urlsQueue.length + ' imgs in queue');
+        hub.text(PicB.postsQueue.length + ' imgs in queue');
 
-        if (!PicB.urlsQueue.length) {
+        if (!PicB.postsQueue.length) {
             hub.remove();
             return;
         }
     
         for (let i = 0; i < connectionsCount; i++) {
-            PicB.addPosts(PicB.urlsQueue.shift(), { 
+            PicB.addPosts([PicB.postsQueue.shift()], { 
                 onLoad: () => PicB.addPostsOneByOne(null),
                 onError: (/** @type {{ target: any; }} */ ev) => {
                     let img = ev.target;
@@ -186,7 +204,7 @@ class PicB {
     static async get(url, handler, options) {
         $.ajax(url, {
             success: function (data, status, xhr) {
-                let html = domParser.parseFromString(data, 'text/html');
+                let html = this.domParser.parseFromString(data, 'text/html');
                 handler($(html));
             },
             error: function (xhr, textStatus, errorMessage) {
