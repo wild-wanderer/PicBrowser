@@ -14,24 +14,11 @@ body {
     position: relative;
 }
 
-.centered {
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-    margin: 0 auto;
-    width: fit-content;
-}
-
-.line {
-    margin: auto;
-    width: fit-content;
-}
-
-img {
-    max-height: 100vh;
-    vertical-align: middle;
-    margin: 1px;
+.post img,
+.post video {
+    height: 100%;
+    width: 100%;
+    object-fit: scale-down;
 }
 
 .info {
@@ -62,4 +49,16 @@ img {
 
 .pager:not([date-set]) {
     cursor: pointer;
+}
+
+#hub {
+    position: fixed;
+    top: 0px;
+    right: 0px;
+    z-index: 2;
+    padding: 5px;
+    margin: 5px;
+    background: #0004;
+    color: #fff8;
+    border-radius: 3px;
 }

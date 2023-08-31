@@ -25,31 +25,19 @@ function onMouseUp(event) {
     event.preventDefault();
     document.body.classList.remove('pointer-disabled');
     pointerDisabled = false;
-    
-    let elements = document.elementsFromPoint(event.clientX, event.clientY);
-    let pics = elements.filter(el => { 
-        const tag = el.tagName.toLowerCase();
-        return ['img', 'image', 'video'].includes(tag);
-    });
 
-    console.log('All the elements under the cursor:');
-    console.log(elements);
-    console.log('All the pictures under the cursor (only the 1st was opend):');
-    console.log(pics);
-
-    const pic = pics[0];
+    const pic = findPicture(event);
     if (!pic) {
         console.log('No picture found');
         return;
     }
 
-    let link = pic.closest('a')?.href;
-    const isPicLink = link && new URL(link).pathname.match(/\w\.\w{2,4}$/);
-    let src = isPicLink ? link : null;
-    if (isPicLink)
-        console.log("Found link to the picture: " + link);
+    let src = first(pic.src, pic.href?.baseVal, pic.currentSrc);    // pic.poster;  Video's thumbnail
 
-    src ??= first(pic.src, pic.href?.baseVal, pic.currentSrc);    // pic.poster;  Video's thumbnail
+    let link = findPicLink(pic, src);
+    if (link)
+        src = link;
+
     if (!src) {
         console.log('Source not found');
         return;
@@ -74,6 +62,61 @@ function onMouseUp(event) {
 }
 
 
+/**@param {MouseEvent} event */
+function findPicture(event) {
+    const picTags = ['img', 'image', 'video'];
+
+    let elements = document.elementsFromPoint(event.clientX, event.clientY);
+    let pics = elements.filter(el => { 
+        const tag = el.tagName.toLowerCase();
+        return picTags.includes(tag);
+    });
+
+    console.log('All the elements under the cursor:');
+    console.log(elements);
+
+    let pic = pics[0];
+    if (pic) {
+        console.log('All the pictures under the cursor (only the 1st was opend):');
+        console.log(pics);
+        return pic;
+    }
+    
+    console.log('No pictures found under the cursor - searching in descendants');
+
+    const selector = picTags.join(', ');
+    elements.some(element => {
+        const subPics = element.querySelectorAll(selector);
+        if (!subPics.length) {
+            return false;
+        }
+
+        if (subPics.length === 1) {
+            pic = subPics[0];
+            console.log('Single picture found:');
+            console.log(pic);
+            return true;
+        }
+
+        console.log('Multiple pictures found (picking the biggest one):');
+        console.log(subPics);
+        
+        let maxArea = 0;
+        subPics.forEach(subPic => {
+            const rect = subPic.getBoundingClientRect();
+            const area = rect.width * rect.height;
+            if (area > maxArea) {
+                pic = subPic;
+                maxArea = area;
+            }
+        });
+        return pic;
+    });
+
+    return pic;
+}
+
+
 /** @param {string} urlStr */
 function getLargeUrl(urlStr) {
     let url = new URL(urlStr);
@@ -94,9 +137,14 @@ function getLargeUrl(urlStr) {
     }
 
     // Alamy
-    else if (host == "c8.alamy.com") {
-        const [match, id, extension] = /\/(\w+)\.(\w+)$/.exec(path);
+    else if (host.endsWith(".alamy.com")) {
+        const [match, id, extension] = /[/-](\w+)\.(\w+)$/.exec(path);
         url.pathname = "/compfr/a/" + id + "." + extension;
+    }
+
+    // Can Stock Photos
+    else if (host.endsWith(".thumbs.canstockphoto.com")) {
+        url.hostname = "cdn.w600.comps.canstockphoto.com";
     }
 
     // Deposit Photos
@@ -132,6 +180,11 @@ function getLargeUrl(urlStr) {
         const [match, prefix, id, postfix] = /(-id|\/id\/)(\d+)($|\/)/.exec(path);
         url.pathname = '/photos/p-id' + id;
         url.search = '?s=2048x2048';
+    }
+
+    // IMX.to
+    else if (host == 'imx.to') {
+        url.pathname = path.replace('/t/', '/i/');
     }
 
     // Shutter Stock
