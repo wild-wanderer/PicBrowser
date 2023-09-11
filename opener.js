@@ -43,6 +43,23 @@ function onMouseUp(event) {
         return;
     }
 
+    if (src.startsWith('data:')) {
+        const id = randomId(6);
+        const newTab = window.open();
+        newTab?.document.write(`
+            <html>
+                <head><title>${id}</title></head>
+                <body style="margin: 0;">
+                    <a download="${id}.jpg" href="${src}">
+                        <img src="${src}" style="display: block; background: #0e0e0e; width: 100%; height: 100%; object-fit: scale-down;">
+                    </a>
+                </body>
+            </html>
+        `);
+        newTab?.document.close();
+        return;
+    }
+
     /* Open image / video, if it's not a blob */
     if (!src.startsWith('blob:')) {
         const largeSrc = getLargeUrl(src);

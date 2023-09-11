@@ -1,0 +1,123 @@
+/* Top page */
+body {
+  overflow: hidden;
+}
+#main {
+  position: static !important;
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+#output {
+  border: none !important;
+}
+html.no-js > body {
+  background-color: #131516 !important;
+}
+html.no-js > body > div {
+  width: 0px !important;
+}
+/* Main frame */
+.top-panel {
+  position: fixed;
+  bottom: 0;
+  height: 100%;
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  z-index: 999;
+  background: #131516;
+}
+.top-panel.minimized {
+  height: 62px;
+}
+.top-panel.minimized .gallery {
+  display: none;
+}
+.top-panel > img {
+  position: absolute;
+  bottom: 22px;
+  height: 40px;
+  box-sizing: border-box;
+  padding: 10px 5px;
+  cursor: pointer;
+}
+.top-panel > img:hover {
+  filter: brightness(1.5) drop-shadow(0 0 1px #fff4);
+}
+.top-panel > img.send {
+  right: 60px;
+}
+.running.top-panel > img.send {
+  filter: sepia(1) hue-rotate(60deg) saturate(2);
+}
+.top-panel > img.send:hover {
+  filter: sepia(1) hue-rotate(60deg) saturate(2) brightness(1.2) drop-shadow(0 0 1px #8f84);
+}
+.top-panel > img.stop {
+  right: 30px;
+}
+.running.top-panel > img.stop {
+  filter: sepia(1) hue-rotate(-60deg) saturate(2);
+}
+.running.top-panel > img.stop:hover {
+  filter: sepia(1) hue-rotate(-60deg) saturate(2) brightness(1.2) drop-shadow(0 0 1px #f444);
+}
+.top-panel > img.minimize {
+  right: 0px;
+}
+.gallery {
+  flex: 1 1 100%;
+  display: flex;
+  flex-flow: wrap;
+  justify-content: left;
+  gap: 20px;
+  padding: 20px 20px 100px;
+  overflow: auto;
+  outline-width: 0px;
+}
+@media (min-width: 1800px) and (max-width: 2000px) {
+  .gallery {
+    padding-left: 162px;
+  }
+}
+.gallery img {
+  height: fit-content;
+  border-radius: 10px;
+}
+.gallery img.hidden {
+  display: none;
+}
+.gallery img.saved {
+  filter: contrast(0.3) sepia(1) hue-rotate(55deg) brightness(1.1) saturate(3);
+}
+.gallery img.rejected {
+  filter: grayscale(1) contrast(0.5);
+}
+.gallery img.saved,
+.gallery img.rejected {
+  transition-duration: 0.4s;
+  transition-delay: 0.1s;
+  transition-timing-function: ease-in;
+  transition-property: opacity;
+  opacity: 0;
+}
+.editor-wrapper {
+  padding: 11px;
+  margin-bottom: 22px;
+  background-color: #181a1b;
+  border-top: solid 1px #1c1c1c;
+  border-bottom: solid 1px #141414;
+  flex-shrink: 0;
+  flex-grow: 0;
+  line-height: 0;
+}
+.editor-wrapper .editor {
+  width: 100%;
+  padding: 0;
+  border: none;
+  resize: none;
+  outline-width: 0px;
+  background: transparent;
+  line-height: 18px;
+}

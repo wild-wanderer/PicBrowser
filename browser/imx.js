@@ -24,7 +24,13 @@ class IMX {
             previewUrl, 
             "imgContinue=Continue+to+your+image...", 
             previewHtml => {
-                let galleryUrl = 'https://imx.to' + previewHtml.find('a[title="Show gallery"]').attr('href');
+                let galleryBtn = previewHtml.find('a[title="Show gallery"]');
+                if (!galleryBtn.length) {
+                    alert("Not a gallery");
+                    return;
+                }
+
+                let galleryUrl = 'https://imx.to' + galleryBtn.attr('href');
                 this.openThumbs(galleryUrl);
             }
         );
@@ -33,15 +39,15 @@ class IMX {
     /** @param {string} galleryUrl */
     static openThumbs(galleryUrl) {
         PicB.get(galleryUrl, galleryHtml => {
-            let imgUrls = galleryHtml
+            let posts = galleryHtml
                 .find('a img.imgtooltip')
                 .toArray()
                 .map(img => ({
-                    src: img['src'],
-                    href: img['src']?.replace('/t/', '/i/')
+                    thumb: img['src'],
+                    src: img['src']?.replace('/t/', '/i/')
                 }));
 
-            PicB.addPostsOneByOne(imgUrls, 1, 200);
+            PicB.addPosts(posts);
         });
     }
     

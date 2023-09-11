@@ -61,6 +61,7 @@ class PicB {
     /**
      * @param {{
      *   src: string;
+     *   thumb?: string;
      *   href?: string;
      *   altUrls?: string[]
      * }[]} posts 
@@ -73,9 +74,11 @@ class PicB {
 
             const tag = options.isVideo ? '<video>' : '<img>'
             var img = $(tag, { 
-                src: post.src,
-                href: post.href
+                src: post.thumb ?? post.src,
+                href: post.href ?? post.src
             });
+            if (post.thumb)
+                img.attr('hd-src', post.src);
 
             if (options.onLoad)
                 img.one('load', options.onLoad);
@@ -93,6 +96,8 @@ class PicB {
             })
             img.appendTo(postDiv);
         });
+
+        this.loadHdOneByOne();
     };
 
 
@@ -116,40 +121,15 @@ class PicB {
 
 
     
-    /**
-     * @param {{
-    *   src: string;
-    *   href?: string;
-    *   altUrls?: string[]
-    * }[]} posts 
-    */
-    static addPostsOneByOne(posts, connectionsCount = 1, errorDelay = 1000) {
-        this.errorDelay = errorDelay;
-        if (posts)
-            PicB.postsQueue.push(...posts);
-
-        let hub = $('#hub');
-        if (!hub.length)
-            hub = $('<div>', { id: 'hub' }).appendTo($('body'));
-        hub.text(PicB.postsQueue.length + ' imgs in queue');
-
-        if (!PicB.postsQueue.length) {
-            hub.remove();
+    static loadHdOneByOne() {
+        let img = $('img[hd-src]').first();
+        if (!img.length)
             return;
-        }
-    
-        for (let i = 0; i < connectionsCount; i++) {
-            PicB.addPosts([PicB.postsQueue.shift()], { 
-                onLoad: () => PicB.addPostsOneByOne(null),
-                onError: (/** @type {{ target: any; }} */ ev) => {
-                    let img = ev.target;
-                    $(img).one('error', () => PicB.addPostsOneByOne(null));
 
-                    let postFix = img.src.includes('?') ? '&r' : '?r'
-                    setTimeout(() => img.src += postFix, this.errorDelay);
-                } 
-            });
-        }
+        let src = img.attr('hd-src');
+        img.removeAttr('hd-src');
+        img.one('load', PicB.loadHdOneByOne);
+        img.attr('src', src);
     }
     
 
@@ -204,7 +184,7 @@ class PicB {
     static async get(url, handler, options) {
         $.ajax(url, {
             success: function (data, status, xhr) {
-                let html = this.domParser.parseFromString(data, 'text/html');
+                let html = PicB.domParser.parseFromString(data, 'text/html');
                 handler($(html));
             },
             error: function (xhr, textStatus, errorMessage) {

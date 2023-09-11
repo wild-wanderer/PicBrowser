@@ -4,18 +4,37 @@
     "manifest_version": 3,
     "content_scripts": [
         {
+            "all_frames": true,
             "matches": [ 
                 "*://*/*" 
             ],
             "js":  [ 
-                "picLinks.js", 
+                "commons.js",
                 "opener.js" 
             ],
             "css": [ 
                 "opener.css" 
             ]
+        },
+        {
+            "all_frames": true,
+            "matches": [ "https://*.perchance.org/ai-girl-image-generator" ],
+            "js": [ "AI/main.js" ],
+            "css": [ "AI/styles.css" ]
+        },
+        {
+            "all_frames": true,
+            "matches": [ "https://image-generation.perchance.org/*" ],
+            "js": [ 
+                "commons.js",
+                "AI/imgFrame.js" 
+            ]
         }
     ],
+    "web_accessible_resources": [{
+        "resources": [ "img/*" ],
+        "matches": [ "*://*/*" ]
+    }],
     "action": {
         "default_title": "Browse pictures",
         "default_icon": {
