@@ -1,15 +1,15 @@
 console.log("Img Frame")
 
-let imgUrl;
+let loopRunning = true;
 
 
 window.addEventListener("message", ev => {
     if (typeof ev.data !== 'string')
         return;
-    if (ev.data !== 'Are we there yet?') 
+    if (ev.data !== 'Stop the loop') 
         return;
 
-    ev.source.postMessage(imgUrl ? ('Img url: ' + imgUrl) : 'Still waiting', '*');
+    loopRunning = false;
 });
 
 let observer = new MutationObserver(mutations => {
@@ -23,26 +23,14 @@ let observer = new MutationObserver(mutations => {
     if (!img.src)
         alert("Img haven't got src");
 
-    imgUrl = img.src;
-    window.parent.postMessage('Img url: ' + imgUrl, '*');
-});
+    window.parent.postMessage('Img url: ' + img.src, '*');
 
-// function openImg(src) {
-//     const id = randomId(6);
-//     const newTab = window.open();
-//     newTab?.document.write(`
-//         <html>
-//             <head><title>${id}</title></head>
-//             <body style="margin: 0;">
-//                 <a download="${id}.jpg" href="${src}">
-//                     <img src="${src}" style="display: block; background: #0e0e0e; width: 100%; height: 100%; object-fit: scale-down;">
-//                 </a>
-//             </body>
-//         </html>
-//     `);
-//     newTab?.document.close();
-    
-// }
+    setTimeout(() => {
+        if (loopRunning) {
+            document.querySelector('#reloadButtonEl').click();
+        }
+    }, 1000);
+});
 
 observer.observe(document.body, { childList: true, subtree: true });
 console.log("Img Frame")

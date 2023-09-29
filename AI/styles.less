@@ -9,10 +9,20 @@ body {
     height: 100%;
     width: 100%;
     overflow: hidden;
-}
 
-#output {
-    border: none !important;
+    #output {
+        border: none !important;
+
+        iframe {
+            position: fixed;
+            left: 0;
+            bottom: 0;
+            height: 100%;
+            width: 100%;
+            z-index: 990;
+        }
+    }
+
 }
 
 html.no-js > body {
@@ -29,12 +39,13 @@ html.no-js > body {
 
 .top-panel {
     position: fixed;
+    left: 0;
     bottom: 0;
     height: 100%;
     width: 100%;
     display: flex;
     flex-direction: column;
-    z-index: 999;
+    z-index: 990;
     background: #131516;
 
     &.minimized {
@@ -44,7 +55,25 @@ html.no-js > body {
             display: none;
         }
     }
-    & > img {
+
+    .icon {
+        position: fixed;
+        top: 20px;
+        right: 35px;
+        width: 100px;
+        height: 100px;
+        z-index: 991;
+        background-size: contain;
+        opacity: 0;
+        transition: opacity 10s ease-in;
+
+        &.activated {
+            opacity: 1;
+            transition: none;
+        }
+    }
+
+    img.btn {
         position: absolute;
         bottom: 22px;
         height: 40px;
@@ -90,7 +119,7 @@ html.no-js > body {
     flex-flow: wrap;
     justify-content: left;
     gap: 20px;
-    padding: 20px 20px 100px;
+    padding: 130px 20px 130px;
     overflow: auto;
     outline-width: 0px;
 
@@ -105,28 +134,12 @@ html.no-js > body {
         &.hidden {
             display: none;
         }
-
-        &.saved {
-            filter: contrast(0.3) sepia(1) hue-rotate(55deg) brightness(1.1) saturate(3)
-        }
-
-        &.rejected {
-            filter: grayscale(1) contrast(0.5);
-        }
-
-        &.saved,
-        &.rejected {
-            transition-duration: 0.4s;
-            transition-delay: 0.1s;
-            transition-timing-function: ease-in;
-            transition-property: opacity;
-            opacity: 0;
-        }
     }
 }
 
 .editor-wrapper {
-    padding: 11px;
+    padding-left: 10px;
+    padding-right: 100px;
     margin-bottom: 22px;
     background-color: #181a1b;
     border-top: solid 1px #1c1c1c;
@@ -137,12 +150,11 @@ html.no-js > body {
 
     .editor {
         width: 100%;
-        // height: 20px;
         padding: 0;
         border: none;
         resize: none;
         outline-width: 0px;
         background: transparent;
-        line-height: 18px;
+        line-height: 40px;
     }
 }

@@ -4,6 +4,7 @@ class Main {
     static hiddenImgs = [];
     static restoredImgs = [];
     static editorActive = true;
+    static prevScrollTime = 0;
 
     static init() {
         if (!location.hostname.endsWith('.perchance.org'))
@@ -17,8 +18,12 @@ class Main {
             
             let focusedEl = ev.relatedTarget;
             let legitAncestor = focusedEl?.closest('.top-panel, #output-container');
-            if (!legitAncestor) {
-                ev.target.focus();
+            if (legitAncestor) {
+                console.log("Not changing focus, because ancestor is:", legitAncestor);
+            }
+            else {
+                console.log("Changing focus back");
+                setTimeout(() => document.querySelector('.editor').focus(), 0);
             }
         });
 
@@ -49,25 +54,45 @@ class Main {
 
         let playSvg = chrome.runtime.getURL('img/play.svg');
         let sendBtn = document.createElement('img');
-        sendBtn.setAttribute('class', 'send');
+        sendBtn.setAttribute('class', 'btn send');
         sendBtn.setAttribute('src', playSvg);
         sendBtn.addEventListener('click', this.startGenerator);
         topPanel.append(sendBtn);
 
         let stopSvg = chrome.runtime.getURL('img/stop.svg');
         let stopBtn = document.createElement('img');
-        stopBtn.setAttribute('class', 'stop');
+        stopBtn.setAttribute('class', 'btn stop');
         stopBtn.setAttribute('src', stopSvg);
         stopBtn.addEventListener('click', this.stopGenerator);
         topPanel.append(stopBtn);
 
         let minimizeSvg = chrome.runtime.getURL('img/minimize.svg');
         let minimizeBtn = document.createElement('img');
-        minimizeBtn.setAttribute('class', 'minimize');
+        minimizeBtn.setAttribute('class', 'btn minimize');
         minimizeBtn.setAttribute('src', minimizeSvg);
         minimizeBtn.addEventListener('click', this.minimize);
         topPanel.append(minimizeBtn);
 
+        let icon = document.createElement('div');
+        icon.setAttribute('class', 'icon');
+        topPanel.append(icon);
+
+
+        document.body.addEventListener("keydown", ev => {
+            switch (ev.key) {
+                case "Tab":   
+                    console.log("Focusing (perhaps)");
+                    setTimeout(() => document.querySelector('.editor').focus(), 0);
+                    break;
+                    
+                default:    
+                    return;
+            }
+
+            ev.preventDefault();
+        });
+
+        document.addEventListener("wheel", this.scroll, { passive: false });
 
 
         window.addEventListener("message", ev => {
@@ -77,39 +102,9 @@ class Main {
                 return;
 
             this.appendImg(ev.data.substring(9));
-
-            let frames = [...document.querySelectorAll('iframe:not([finished])')];
-            let sender = frames.find(frame => frame.contentWindow === ev.source);
-            sender?.setAttribute('finished', true);
-                
-            this.refreshIfFinished();
-        });
-
-        setInterval(this.askAround, 3000);
-    }
-
-
-    static askAround() {
-        Main.refreshIfFinished();
-        let frames = document.querySelectorAll('iframe:not([finished])');
-        frames.forEach(frame => {
-            frame.contentWindow.postMessage('Are we there yet?', '*');
         });
     }
 
-
-    static refreshIfFinished() {
-        if (!Main.running)
-            return;
-
-        let frames = document.querySelectorAll('iframe:not([finished])');
-        if (frames.length) 
-            return;
-
-        let anyFrames = document.querySelectorAll('iframe');
-        if (anyFrames.length)
-            document.querySelector('#generateButtonEl').click();
-    }
 
     static startGenerator() {
         let editor = document.querySelector('.editor');
@@ -133,6 +128,10 @@ class Main {
     static stopGenerator() {
         Main.running = false;
         document.querySelector('.top-panel').classList.remove('running');
+        let frames = document.querySelectorAll('iframe');
+        frames.forEach(frame => {
+            frame.contentWindow.postMessage('Stop the loop', '*');
+        });
     }
 
     static minimize() {
@@ -160,13 +159,16 @@ class Main {
     }
 
     static hideImg(img, saved) {
-        let className = saved ? 'saved' : 'rejected';
-        img.classList.add(className);
-        setTimeout(() => {
-            img.classList.remove(className);
-            img.classList.add('hidden');
-            this.hiddenImgs.push(img);
-        }, 500);
+        img.classList.add('hidden');
+        this.hiddenImgs.push(img);
+
+        let iconType = saved ? 'download' : 'trash';
+        let url = chrome.runtime.getURL(`img/${iconType}.svg`);
+
+        let icon = document.querySelector('.icon');
+        icon.setAttribute('style', `background: url(${url});`)
+        icon.classList.add('activated');
+        setTimeout(() => icon.classList.remove('activated'), 100);
     }
 
     static onKeyDown(ev) {
@@ -248,6 +250,43 @@ class Main {
         editor.style.height = editor.scrollHeight + 'px'
         localStorage.setItem('query', editor.value);
     }
+
+
+    /** @param {MouseEvent} event */
+    static scroll(event) {
+        event.preventDefault();
+
+        if (event.timeStamp - this.prevScrollTime < 10)
+            return;
+        this.prevScrollTime = event.timeStamp;
+
+        let gallery = document.querySelector('.gallery')
+        let images = [...gallery.querySelectorAll('img')];
+        let rect = gallery.getBoundingClientRect();
+        let center = (rect.top + rect.bottom) / 2;
+
+        if (event['deltaY'] > 0) {
+            var selectedImg = images.filter(img => Main.midYPos(img) > center + 20)[0];
+        }
+        else {
+            var selectedImg = images.filter(img => Main.midYPos(img) < center - 20).at(-1);
+        }
+
+        if (selectedImg) {
+            let y = gallery.scrollTop + Main.midYPos(selectedImg) - center;
+            gallery.scroll(0, y);
+        }
+    };
+
+    /** 
+     * Returns Y position of a middle of the element
+     * @param {Element} el 
+     * */
+    static midYPos(el) {
+        let rect = el.getBoundingClientRect();
+        return (rect.top + rect.bottom) / 2;
+    }
+
 }
 
 Main.init();
