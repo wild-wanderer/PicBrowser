@@ -19,20 +19,26 @@
         {
             "all_frames": true,
             "matches": [ "https://*.perchance.org/ai-girl-image-generator" ],
-            "js": [ "AI/main.js" ],
-            "css": [ "AI/styles.css" ]
+            "js": [ 
+                "jquery-3.6.4.js",
+                "AI/main.js"
+            ],
+            "css": [ 
+                "AI/styles.css"
+            ]
         },
         {
             "all_frames": true,
             "matches": [ "https://image-generation.perchance.org/*" ],
             "js": [ 
                 "commons.js",
-                "AI/imgFrame.js" 
+                "AI/imgFrame.js",
+                "jquery-3.6.4.js"
             ]
         }
     ],
     "web_accessible_resources": [{
-        "resources": [ "img/*" ],
+        "resources": [ "*" ],
         "matches": [ "*://*/*" ]
     }],
     "action": {

@@ -47,11 +47,12 @@ html.no-js > body {
     flex-direction: column;
     z-index: 990;
     background: #131516;
+    text-align: left;
 
     &.minimized {
-        height: 62px;
+        height: max-content;
 
-        .gallery {
+        .gallery-wrapper {
             display: none;
         }
     }
@@ -73,7 +74,7 @@ html.no-js > body {
         }
     }
 
-    img.btn {
+    svg.btn {
         position: absolute;
         bottom: 22px;
         height: 40px;
@@ -113,26 +114,49 @@ html.no-js > body {
     }
 }
 
-.gallery {
-    flex: 1 1 100%;
+.gallery-wrapper {
+    flex: 1 1 0px;
     display: flex;
-    flex-flow: wrap;
-    justify-content: left;
-    gap: 20px;
-    padding: 130px 20px 130px;
-    overflow: auto;
-    outline-width: 0px;
+    flex-direction: column;
+    position: relative;
 
-    @media (min-width: 1800px) and (max-width: 2000px) {
-        padding-left: 162px;
+    .gallery {
+        flex: 1 1 0px;
+        display: flex;
+        flex-flow: wrap;
+        justify-content: left;
+        gap: 20px;
+        padding: 130px 20px 130px;
+        overflow: auto;
+        outline-width: 0px;
+
+        @media (min-width: 1800px) and (max-width: 2000px) {
+            padding-left: 162px;
+        }
+
+        img {
+            height: fit-content;
+            border-radius: 10px;
+
+            &.hidden {
+                display: none;
+            }
+        }
     }
 
-    img {
-        height: fit-content;
-        border-radius: 10px;
+    .side-panel {
+        position: absolute;
+        top: 0;
+        bottom: 0;
+        left: 0;
+        width: 0;
+        background-color: #181a1b;
+        border-right: solid 1px #1c1c1c;
+        overflow: hidden;
 
-        &.hidden {
-            display: none;
+        &:hover {
+            min-width: 200px;
+            width: max-content;
         }
     }
 }

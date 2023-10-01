@@ -1,4 +1,3 @@
-console.log("Img Frame")
 
 let loopRunning = true;
 

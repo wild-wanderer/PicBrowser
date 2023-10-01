@@ -5,15 +5,20 @@ class Main {
     static restoredImgs = [];
     static editorActive = true;
     static prevScrollTime = 0;
+    static domParser = new DOMParser();
 
-    static init() {
-        if (!location.hostname.endsWith('.perchance.org'))
+    static async init() {
+        if (!location.hostname.endsWith('.perchance.org')) {
             return;
+        }
 
-        let topPanel = document.createElement('div');
-        topPanel.setAttribute('class', 'top-panel');
-        document.body.append(topPanel);
-        topPanel.addEventListener('focusout', ev => {
+        let overlayUrl = chrome.runtime.getURL('AI/overlay.html');
+        await fetch(overlayUrl)
+            .then(response => response.text())
+            .then(html => this.domParser.parseFromString(html, 'text/html'))
+            .then(overlay => $(overlay).find('.top-panel').appendTo($("body")));
+        
+        $('.top-panel').on('focusout', ev => {
             console.log('Focus shift', ev.target, ev.relatedTarget);
             
             let focusedEl = ev.relatedTarget;
@@ -27,73 +32,31 @@ class Main {
             }
         });
 
-        let gallery = document.createElement('div');
-        gallery.setAttribute('class', 'gallery');
-        gallery.setAttribute('tabindex', 0);
-        topPanel.append(gallery);
-
-        let editorWrapper = document.createElement('div');
-        editorWrapper.setAttribute('class', 'editor-wrapper');
-        topPanel.append(editorWrapper);
-
-        let editor = document.createElement('textarea');
-        editor.setAttribute('class', 'editor');
-        editor.addEventListener('input', () => this.resizeEditor(editor));
-        editor.addEventListener('keypress', ev => {
+        let editor = $('.editor');
+        editor.on('input', () => this.resizeEditor(editor[0]));
+        editor.on('keypress', ev => {
             if (ev.key != "Enter") 
                 return;
             this.startGenerator();
             ev.preventDefault();
         });
-        editor.value = localStorage.getItem('query') ?? '{ old, mature, adult } white European girl';
-        editorWrapper.append(editor);
-        this.resizeEditor(editor);
+        editor.val(localStorage.getItem('query') ?? '');
+        this.resizeEditor(editor[0]);
 
-        document.addEventListener('keydown', this.onKeyDown);
+        let sidePanel = $('.side-panel');
+        let tagListUrl = chrome.runtime.getURL('AI/tags.json');
+        fetch(tagListUrl)
+            .then(response => response.json())
+            .then(tags => tags.forEach(tag => {
+                $('<p>', { id: tag }).text(tag).appendTo(sidePanel);
+            }));
 
-
-        let playSvg = chrome.runtime.getURL('img/play.svg');
-        let sendBtn = document.createElement('img');
-        sendBtn.setAttribute('class', 'btn send');
-        sendBtn.setAttribute('src', playSvg);
-        sendBtn.addEventListener('click', this.startGenerator);
-        topPanel.append(sendBtn);
-
-        let stopSvg = chrome.runtime.getURL('img/stop.svg');
-        let stopBtn = document.createElement('img');
-        stopBtn.setAttribute('class', 'btn stop');
-        stopBtn.setAttribute('src', stopSvg);
-        stopBtn.addEventListener('click', this.stopGenerator);
-        topPanel.append(stopBtn);
-
-        let minimizeSvg = chrome.runtime.getURL('img/minimize.svg');
-        let minimizeBtn = document.createElement('img');
-        minimizeBtn.setAttribute('class', 'btn minimize');
-        minimizeBtn.setAttribute('src', minimizeSvg);
-        minimizeBtn.addEventListener('click', this.minimize);
-        topPanel.append(minimizeBtn);
-
-        let icon = document.createElement('div');
-        icon.setAttribute('class', 'icon');
-        topPanel.append(icon);
-
-
-        document.body.addEventListener("keydown", ev => {
-            switch (ev.key) {
-                case "Tab":   
-                    console.log("Focusing (perhaps)");
-                    setTimeout(() => document.querySelector('.editor').focus(), 0);
-                    break;
-                    
-                default:    
-                    return;
-            }
-
-            ev.preventDefault();
-        });
+        $('.send').on('click', this.startGenerator);
+        $('.stop').on('click', this.stopGenerator);
+        $('.minimize').on('click', this.minimize);
 
         document.addEventListener("wheel", this.scroll, { passive: false });
-
+        document.body.addEventListener("keydown", this.onKeyDown);
 
         window.addEventListener("message", ev => {
             if (typeof ev.data !== 'string')
@@ -148,6 +111,8 @@ class Main {
         img.setAttribute('title', query)
         img.addEventListener('mouseup', ev => {
             if (ev.button == 1) {
+                if (ev.timeStamp - this.prevScrollTime < 30)
+                    return;
                 this.hideImg(img, false);
             }
             else if (ev.button == 0) {
@@ -179,23 +144,32 @@ class Main {
         if (!ev.ctrlKey)
             return;
 
-        if (ev.key == 'z') {
-            ev.preventDefault();
-            let img = Main.hiddenImgs.pop();
-            if (!img)
+        switch (ev.key) {
+            case "Tab":   
+                setTimeout(() => document.querySelector('.editor').focus(), 0);
+                break;
+
+            case "z":
+                var img = Main.hiddenImgs.pop();
+                if (!img)
+                    return;
+                img.classList?.remove('hidden');
+                Main.restoredImgs.push(img);
+                break;
+
+            case "y":
+                var img = Main.restoredImgs.pop();
+                if (!img)
+                    return;
+                img.classList?.add('hidden');
+                Main.hiddenImgs.push(img);
+                break;
+                    
+            default:    
                 return;
-            img.classList?.remove('hidden');
-            Main.restoredImgs.push(img);
         }
-        else if (ev.key == 'y') {
-            ev.preventDefault();
-            let img = Main.restoredImgs.pop();
-            if (!img)
-                return;
-            img.classList?.add('hidden');
-            Main.hiddenImgs.push(img);
-        }
-            
+
+        ev.preventDefault();   
     }
 
     static downloadImg(img) {
@@ -261,7 +235,7 @@ class Main {
         this.prevScrollTime = event.timeStamp;
 
         let gallery = document.querySelector('.gallery')
-        let images = [...gallery.querySelectorAll('img')];
+        let images = [...gallery.querySelectorAll('img:not(.hidden)')];
         let rect = gallery.getBoundingClientRect();
         let center = (rect.top + rect.bottom) / 2;
 
