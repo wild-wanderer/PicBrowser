@@ -9,11 +9,11 @@
                 "*://*/*" 
             ],
             "js":  [ 
-                "commons.js",
-                "opener.js" 
+                "opener/commons.js",
+                "opener/opener.js" 
             ],
             "css": [ 
-                "opener.css" 
+                "opener/opener.css" 
             ]
         },
         {
@@ -21,18 +21,18 @@
             "matches": [ "https://*.perchance.org/ai-girl-image-generator" ],
             "js": [ 
                 "jquery-3.6.4.js",
-                "AI/main.js"
+                "AI/dist/main.js"
             ],
             "css": [ 
-                "AI/styles.css"
+                "AI/dist/styles.css"
             ]
         },
         {
             "all_frames": true,
             "matches": [ "https://image-generation.perchance.org/*" ],
             "js": [ 
-                "commons.js",
-                "AI/imgFrame.js",
+                "opener/commons.js",
+                "AI/dist/imgFrame.js",
                 "jquery-3.6.4.js"
             ]
         }
@@ -48,7 +48,7 @@
         }
     },
     "background": {
-        "service_worker": "action.js"
+        "service_worker": "browser/action.js"
     },
     "permissions": [
         "tabs",

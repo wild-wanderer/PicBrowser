@@ -15,7 +15,7 @@ let observer = new MutationObserver(mutations => {
     let img = mutations
         .filter(mutation => mutation.type === 'childList')
         .flatMap(mutation => [...mutation.addedNodes])
-        .filter(node => node.nodeName === 'IMG')[0];
+        .filter(node => node.nodeName === 'IMG')[0] as HTMLImageElement;
 
     if (!img)
         return;
@@ -26,7 +26,7 @@ let observer = new MutationObserver(mutations => {
 
     setTimeout(() => {
         if (loopRunning) {
-            document.querySelector('#reloadButtonEl').click();
+            (document.querySelector('#reloadButtonEl') as HTMLButtonElement).click();
         }
     }, 1000);
 });

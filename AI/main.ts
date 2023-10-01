@@ -1,8 +1,8 @@
 
 class Main {
     static running = false;
-    static hiddenImgs = [];
-    static restoredImgs = [];
+    static hiddenImgs: HTMLImageElement[] = [];
+    static restoredImgs: HTMLImageElement[] = [];
     static editorActive = true;
     static prevScrollTime = 0;
     static domParser = new DOMParser();
@@ -21,18 +21,18 @@ class Main {
         $('.top-panel').on('focusout', ev => {
             console.log('Focus shift', ev.target, ev.relatedTarget);
             
-            let focusedEl = ev.relatedTarget;
+            let focusedEl = ev.relatedTarget as HTMLElement;
             let legitAncestor = focusedEl?.closest('.top-panel, #output-container');
             if (legitAncestor) {
                 console.log("Not changing focus, because ancestor is:", legitAncestor);
             }
             else {
                 console.log("Changing focus back");
-                setTimeout(() => document.querySelector('.editor').focus(), 0);
+                setTimeout(() => (document.querySelector('.editor') as HTMLElement).focus(), 0);
             }
         });
 
-        let editor = $('.editor');
+        let editor = $('.editor') as JQuery<HTMLTextAreaElement>;
         editor.on('input', () => this.resizeEditor(editor[0]));
         editor.on('keypress', ev => {
             if (ev.key != "Enter") 
@@ -46,7 +46,7 @@ class Main {
         let sidePanel = $('.side-panel');
         let tagListUrl = chrome.runtime.getURL('AI/tags.json');
         fetch(tagListUrl)
-            .then(response => response.json())
+            .then(response => response.json() as Promise<string[]>)
             .then(tags => tags.forEach(tag => {
                 $('<p>', { id: tag }).text(tag).appendTo(sidePanel);
             }));
@@ -70,39 +70,38 @@ class Main {
 
 
     static startGenerator() {
-        let editor = document.querySelector('.editor');
+        let editor = document.querySelector('.editor') as HTMLTextAreaElement;
         let query = Main.convertInput(editor.value);
 
-        let description = document.querySelector('textarea[data-name="description"]')
+        let description = document.querySelector('textarea[data-name="description"]') as HTMLTextAreaElement;
         description.value = query.positive;
         description.dispatchEvent(new Event('input', { bubbles: true }));
 
-        let antyDesc = document.querySelector('input[data-name="negative"]')
+        let antyDesc = document.querySelector('input[data-name="negative"]') as HTMLInputElement;
         antyDesc.value = query.negative;
         antyDesc.dispatchEvent(new Event('input', { bubbles: true }));
 
-        let button = document.querySelector('#generateButtonEl');
+        let button = document.querySelector('#generateButtonEl') as HTMLButtonElement;
         setTimeout(() => button.click(), 0);
 
         Main.running = true;
-        document.querySelector('.top-panel').classList.add('running');
+        document.querySelector('.top-panel')?.classList?.add('running');
     }
 
     static stopGenerator() {
         Main.running = false;
-        document.querySelector('.top-panel').classList.remove('running');
+        document.querySelector('.top-panel')?.classList?.remove('running');
         let frames = document.querySelectorAll('iframe');
         frames.forEach(frame => {
-            frame.contentWindow.postMessage('Stop the loop', '*');
+            frame.contentWindow?.postMessage('Stop the loop', '*');
         });
     }
 
     static minimize() {
-        document.querySelector('.top-panel')
-            .classList.toggle('minimized');
+        document.querySelector('.top-panel')?.classList.toggle('minimized');
     }
 
-    static appendImg(src) {
+    static appendImg(src: string) {
         let gallery = document.querySelector('.gallery');
 
         let query = this.getCurrentQuery();
@@ -120,23 +119,23 @@ class Main {
             }
             ev.preventDefault();
         });
-        gallery.append(img);
+        gallery?.append(img);
     }
 
-    static hideImg(img, saved) {
+    static hideImg(img: HTMLImageElement, saved: boolean) {
         img.classList.add('hidden');
         this.hiddenImgs.push(img);
 
         let iconType = saved ? 'download' : 'trash';
         let url = chrome.runtime.getURL(`img/${iconType}.svg`);
 
-        let icon = document.querySelector('.icon');
+        let icon = document.querySelector('.icon') as HTMLElement;
         icon.setAttribute('style', `background: url(${url});`)
         icon.classList.add('activated');
         setTimeout(() => icon.classList.remove('activated'), 100);
     }
 
-    static onKeyDown(ev) {
+    static onKeyDown(ev: KeyboardEvent) {
         let editorFocused = document.querySelector('.editor') === document.activeElement;
         if (editorFocused)
             return;
@@ -146,7 +145,8 @@ class Main {
 
         switch (ev.key) {
             case "Tab":   
-                setTimeout(() => document.querySelector('.editor').focus(), 0);
+                let editor = document.querySelector('.editor') as HTMLElement;
+                setTimeout(() => editor.focus(), 0);
                 break;
 
             case "z":
@@ -172,7 +172,7 @@ class Main {
         ev.preventDefault();   
     }
 
-    static downloadImg(img) {
+    static downloadImg(img: HTMLImageElement) {
         fetch('http://localhost:3000/upload', {
             method: 'POST',
             headers: { 
@@ -187,8 +187,7 @@ class Main {
             if (response.ok) {
                 this.hideImg(img, true);
             } else {
-                console.error(error);
-                alert('Failed to save the image:', response.status);
+                alert('Failed to save the image:' + response.status);
             }
         })
         .catch((error) => {
@@ -197,7 +196,7 @@ class Main {
         });
     }
 
-    static convertInput(inputString) {
+    static convertInput(inputString: string) {
         const match = inputString.match(/\{([^}]+)\}/);
         let negative = "";
         let positive = inputString;
@@ -209,9 +208,9 @@ class Main {
     }
 
     static getCurrentQuery() {
-        let query = document.querySelector('textarea[data-name="description"]').value;
-        let negative = document.querySelector('input[data-name="negative"]').value;
-        let artStyle = document.querySelector('select[data-name="artStyle"]').selectedOptions[0].text;
+        let query = (document.querySelector('textarea[data-name="description"]') as HTMLTextAreaElement).value;
+        let negative = (document.querySelector('input[data-name="negative"]') as HTMLInputElement).value;
+        let artStyle = (document.querySelector('select[data-name="artStyle"]') as HTMLSelectElement).selectedOptions[0].text;
 
         query = query.trim();
         if (negative?.length)
@@ -219,31 +218,30 @@ class Main {
         return query + ` [${artStyle}]`;
     }
 
-    static resizeEditor(editor) {
+    static resizeEditor(editor: HTMLTextAreaElement) {
         editor.style.height = '0';
         editor.style.height = editor.scrollHeight + 'px'
         localStorage.setItem('query', editor.value);
     }
 
 
-    /** @param {MouseEvent} event */
-    static scroll(event) {
+    static scroll(event: WheelEvent) {
         event.preventDefault();
 
         if (event.timeStamp - this.prevScrollTime < 10)
             return;
         this.prevScrollTime = event.timeStamp;
 
-        let gallery = document.querySelector('.gallery')
+        let gallery = document.querySelector('.gallery') as HTMLElement;
         let images = [...gallery.querySelectorAll('img:not(.hidden)')];
         let rect = gallery.getBoundingClientRect();
         let center = (rect.top + rect.bottom) / 2;
 
-        if (event['deltaY'] > 0) {
+        if (event.deltaY > 0) {
             var selectedImg = images.filter(img => Main.midYPos(img) > center + 20)[0];
         }
         else {
-            var selectedImg = images.filter(img => Main.midYPos(img) < center - 20).at(-1);
+            var selectedImg = images.filter(img => Main.midYPos(img) < center - 20).at(-1) as Element;
         }
 
         if (selectedImg) {
@@ -252,11 +250,8 @@ class Main {
         }
     };
 
-    /** 
-     * Returns Y position of a middle of the element
-     * @param {Element} el 
-     * */
-    static midYPos(el) {
+    /** Returns Y position of a middle of the element */
+    static midYPos(el: Element) {
         let rect = el.getBoundingClientRect();
         return (rect.top + rect.bottom) / 2;
     }
