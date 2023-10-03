@@ -1,6 +1,8 @@
+import { Tag, Tagish } from "./model";
 
 class Main {
     static running = false;
+    static tagList: Tagish[] = [];
     static hiddenImgs: HTMLImageElement[] = [];
     static restoredImgs: HTMLImageElement[] = [];
     static editorActive = true;
@@ -43,13 +45,13 @@ class Main {
         editor.val(localStorage.getItem('query') ?? '');
         this.resizeEditor(editor[0]);
 
-        let sidePanel = $('.side-panel');
         let tagListUrl = chrome.runtime.getURL('AI/tags.json');
         fetch(tagListUrl)
-            .then(response => response.json() as Promise<string[]>)
-            .then(tags => tags.forEach(tag => {
-                $('<p>', { id: tag }).text(tag).appendTo(sidePanel);
-            }));
+            .then(response => response.json() as Promise<Tagish[]>)
+            .then(tagList => {
+                this.tagList = tagList
+                this.addTagsToSidePanel();
+            });
 
         $('.send').on('click', this.startGenerator);
         $('.stop').on('click', this.stopGenerator);
@@ -254,6 +256,41 @@ class Main {
     static midYPos(el: Element) {
         let rect = el.getBoundingClientRect();
         return (rect.top + rect.bottom) / 2;
+    }
+
+    static addTagsToSidePanel() {
+        let sidePanel = $('.side-panel');
+        this.tagList.forEach(tagish => {
+            if (tagish.type == "tag") {
+                let tag = tagish as Tag;
+                let element = $('<p>', { id: tagish, class: 'tag-check-box' }).text(tag.value).appendTo(sidePanel);
+                element.on("click", ev => this.onTagCheckBoxClick(ev));
+            }
+        })
+    }
+
+    static onTagCheckBoxClick(ev: JQuery.ClickEvent) {
+        let element = ev.target as HTMLElement
+        switch (ev.button) {
+            case 0:
+                if (element.classList.contains("checked")) {
+                    element.classList.toggle("important");
+                }
+                else {
+                    element.classList.add("checked");
+                }
+                break;
+
+            case 1:
+                element.classList.remove("checked");
+                break;
+
+            case 2:
+                element.classList.toggle("disabled");
+                break;
+        }
+        ev.preventDefault();
+        ev.stopPropagation();
     }
 
 }

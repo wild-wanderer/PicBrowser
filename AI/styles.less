@@ -157,6 +157,27 @@ html.no-js > body {
         &:hover {
             min-width: 200px;
             width: max-content;
+            padding: 10px;
+        }
+
+        p {
+            margin: 5px;
+            background-image: radial-gradient(#0000 2px, #fffd 3.5px, #0000 5px);
+            background-size: 10px 10px;
+            background-repeat: no-repeat;
+            background-position-y: 3.5px;
+            padding-left: 18px;
+
+            &.checked {
+                background-image: radial-gradient(#88ed39 3.5px, #0000 5px);
+
+                &.important {
+                    font-weight: bold;
+                }
+                &.disabled {
+                    color: #888;
+                }
+            }
         }
     }
 }
