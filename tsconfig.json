@@ -1,5 +1,5 @@
 {
-    "compilerOptions": {
+  "compilerOptions": {
       /* Visit https://aka.ms/tsconfig to read more about this file */
   
       /* Projects */
@@ -106,15 +106,12 @@
       // "skipDefaultLibCheck": true,                      /* Skip type checking .d.ts files that are included with TypeScript. */
       "skipLibCheck": true,                                 /* Skip type checking all .d.ts files. */
   
-      "outDir": "./build"
+      "outDir": "./dist"
     },
   
-    "include": [
-      "**/*.ts" // Specify the source files to include
-    ],
     "exclude": [
       "node_modules",
-      "dist"
+      "dist",
+      "img"
     ]
-  }
-  
+}

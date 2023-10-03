@@ -1,4 +1,3 @@
-import { Tag, Tagish } from "./model";
 
 class Main {
     static running = false;
@@ -294,5 +293,25 @@ class Main {
     }
 
 }
+
+
+
+
+interface Tagish {
+    type: string;
+}
+
+interface Tag extends Tagish {
+    value: string;
+    id: string;
+
+    checked?: boolean;
+    important?: boolean;
+    disabled?: boolean;
+}
+
+
+
+
 
 Main.init();

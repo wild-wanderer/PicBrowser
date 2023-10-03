@@ -21,10 +21,10 @@
             "matches": [ "https://*.perchance.org/ai-girl-image-generator" ],
             "js": [ 
                 "jquery-3.6.4.js",
-                "AI/dist/main.js"
+                "dist/main.js"
             ],
             "css": [ 
-                "AI/dist/styles.css"
+                "dist/aiStyles.css"
             ]
         },
         {
@@ -32,7 +32,7 @@
             "matches": [ "https://image-generation.perchance.org/*" ],
             "js": [ 
                 "opener/commons.js",
-                "AI/dist/imgFrame.js",
+                "dist/imgFrame.js",
                 "jquery-3.6.4.js"
             ]
         }
