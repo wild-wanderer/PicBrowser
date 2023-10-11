@@ -162,23 +162,15 @@ html.no-js > body {
             padding: 10px;
         }
 
-        p {
-            margin: 5px;
-            background-image: radial-gradient(#0000 2px, #fffd 3.5px, #0000 5px);
-            background-size: 10px 10px;
-            background-repeat: no-repeat;
-            background-position-y: 3.5px;
-            padding-left: 18px;
+        .tag-group {
+            margin: 12px 0;
 
-            &.checked {
-                background-image: radial-gradient(#88ed39 3.5px, #0000 5px);
-
-                &.important {
-                    font-weight: bold;
-                }
-                &.disabled {
-                    color: #888;
-                }
+            .tag-check-box {
+                margin: 5px;
+                background-size: 10px 10px;
+                background-repeat: no-repeat;
+                background-position-y: 3.5px;
+                padding-left: 18px;
             }
         }
     }
@@ -187,7 +179,7 @@ html.no-js > body {
 .editor-wrapper {
     padding-left: 10px;
     padding-right: 100px;
-    margin-bottom: 22px;
+    margin-bottom: 21px;
     background-color: #181a1b;
     border-top: solid 1px #1c1c1c;
     border-bottom: solid 1px #141414;
@@ -202,6 +194,36 @@ html.no-js > body {
         resize: none;
         outline-width: 0px;
         background: transparent;
-        line-height: 40px;
+        line-height: 30px;
+    }
+
+    .tag-bar {
+        height: 30px;
+        line-height: 30px;
+
+        span.tag {
+            padding: 2px 5px;
+            border-radius: 4px;
+            cursor: pointer;
+
+            &:hover {
+                color: white;
+            }
+        }
+    }
+}
+
+.tag {
+    cursor: pointer;
+
+    &.important {
+        font-weight: bold;
+    }
+    &.disabled {
+        opacity: 0.5;
+        text-decoration: line-through;
+    }
+    &:not(.checked) {
+        color: #aaa;
     }
 }

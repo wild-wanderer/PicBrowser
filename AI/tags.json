@@ -1,6 +1,25 @@
 [
-    { "type": "tag", "id": "Ej77lx", "value": "happy"       },
-    { "type": "tag", "id": "3gbXOO", "value": "Siberian"    },
-    { "type": "tag", "id": "3Mwaaq", "value": "husky"       },
-    { "type": "tag", "id": "fyU7ou", "value": "boy"         }
+    {
+        "color": "#aa5",
+        "tags": [
+            { "id": "Ej77lx", "value": "happy"       },
+            { "id": "3gbXOO", "value": "Siberian"    }
+        ]
+    },
+    {
+        "color": "#5aa",
+        "isSentence": true,
+        "tags": [
+            { "id": "3Mwaaq", "value": "husky"       },
+            { "id": "fyU7ou", "value": "boy"         }
+        ]
+    },
+    {
+        "color": "#a55",
+        "isNegative": true,
+        "tags": [
+            { "id": "SUv0Bl", "value": "fat"         },
+            { "id": "mZFaCo", "value": "ugly"        }
+        ]
+    }
 ]

@@ -1,7 +1,8 @@
 
 class Main {
     static running = false;
-    static tagList: Tagish[] = [];
+    static tagGroups: TagGroup[] = [];
+    static tagMap: Map<string, Tag> = new Map();
     static hiddenImgs: HTMLImageElement[] = [];
     static restoredImgs: HTMLImageElement[] = [];
     static editorActive = true;
@@ -46,11 +47,8 @@ class Main {
 
         let tagListUrl = chrome.runtime.getURL('AI/tags.json');
         fetch(tagListUrl)
-            .then(response => response.json() as Promise<Tagish[]>)
-            .then(tagList => {
-                this.tagList = tagList
-                this.addTagsToSidePanel();
-            });
+            .then(response => response.json() as Promise<TagGroup[]>)
+            .then(tagGroups => this.initializeTags(tagGroups));
 
         $('.send').on('click', this.startGenerator);
         $('.stop').on('click', this.stopGenerator);
@@ -73,13 +71,14 @@ class Main {
     static startGenerator() {
         let editor = document.querySelector('.editor') as HTMLTextAreaElement;
         let query = Main.convertInput(editor.value);
+        let tagQuery = Main.convertInput(Main.getTagString(false));
 
         let description = document.querySelector('textarea[data-name="description"]') as HTMLTextAreaElement;
-        description.value = query.positive;
+        description.value = [query.positive, tagQuery.positive].join(", ");
         description.dispatchEvent(new Event('input', { bubbles: true }));
 
         let antyDesc = document.querySelector('input[data-name="negative"]') as HTMLInputElement;
-        antyDesc.value = query.negative;
+        antyDesc.value = [query.negative, tagQuery.negative].join(", ");
         antyDesc.dispatchEvent(new Event('input', { bubbles: true }));
 
         let button = document.querySelector('#generateButtonEl') as HTMLButtonElement;
@@ -198,7 +197,7 @@ class Main {
     }
 
     static convertInput(inputString: string) {
-        const match = inputString.match(/\{([^}]+)\}/);
+        const match = inputString.match(/<([^<>]+)>/);
         let negative = "";
         let positive = inputString;
         if (match) {
@@ -257,57 +256,209 @@ class Main {
         return (rect.top + rect.bottom) / 2;
     }
 
-    static addTagsToSidePanel() {
-        let sidePanel = $('.side-panel');
-        this.tagList.forEach(tagish => {
-            if (tagish.type == "tag") {
-                let tag = tagish as Tag;
-                let element = $('<p>', { id: tagish, class: 'tag-check-box' }).text(tag.value).appendTo(sidePanel);
-                element.on("click", ev => this.onTagCheckBoxClick(ev));
+
+    static initializeTags(tagGroups: TagGroup[]) {
+        this.tagGroups = tagGroups;
+        for (let group of tagGroups) {
+            for (let tag of group.tags) {
+                if (this.tagMap.has(tag.id)) {
+                    alert("TagID '" + tag.id + "' is duplicated");
+                    this.tagMap.clear();
+                    return;
+                }
+                this.tagMap.set(tag.id, tag);
+                tag.parent = group;
             }
-        })
+        }
+
+        let activeTags = JSON.parse(localStorage.getItem('tags') ?? "[]") as TagInfo[];
+        activeTags.forEach(tagInfo => {
+            let tag = this.tagMap.get(tagInfo.id);
+            if (tag) {
+                tag.checked = true;
+                tag.disabled = tagInfo.disabled;
+                tag.important = tagInfo.important;
+            }
+            if (tag?.parent?.isSentence) {
+
+            }
+        });
+
+        tagGroups
+            .filter(group => group.isSentence)
+            .filter(group => group.tags.some(tag => tag.important))
+            .forEach(group => {
+                group.important = true;
+                group.tags.forEach(tag => tag.important = true);
+            });
+
+        this.redrawTags();
     }
 
-    static onTagCheckBoxClick(ev: JQuery.ClickEvent) {
+
+    static onTagCheckBoxClick(ev: JQuery.MouseDownEvent) {
         let element = ev.target as HTMLElement
+        let tag = this.tagMap.get(element.id);
+        if (!tag) {
+            return;
+        }
+
         switch (ev.button) {
             case 0:
-                if (element.classList.contains("checked")) {
-                    element.classList.toggle("important");
+                if (tag.checked) {
+                    tag.important = !tag.important;
+                    if (tag.parent?.isSentence) {
+                        tag.parent.important = tag.important;
+                        tag.parent.tags.forEach(t => t.important = tag?.important)
+                    }
                 }
                 else {
-                    element.classList.add("checked");
+                    tag.checked = true;
                 }
                 break;
 
             case 1:
-                element.classList.remove("checked");
+                tag.checked = false;
+                tag.disabled = false;
                 break;
 
             case 2:
-                element.classList.toggle("disabled");
+                tag.disabled = !tag.disabled;
                 break;
         }
+        this.redrawTags();
+
+        let activeTagsInfo = [...this.tagMap.values()]
+            .filter(tag => tag.checked)
+            .map(tag => ({
+                id: tag.id,
+                important: tag.important,
+                disabled: tag.disabled
+            }));
+        localStorage.setItem('tags', JSON.stringify(activeTagsInfo));
+
         ev.preventDefault();
         ev.stopPropagation();
     }
 
+
+    static redrawTags() {
+        let sidePanel = $('.side-panel');
+        sidePanel.html("");
+
+        this.tagGroups.forEach(group => {
+            let groupElement = $('<div>', { class: 'tag-group' }).appendTo(sidePanel)
+
+            group.tags.forEach(tag => {
+                let element = $('<p>', { id: tag.id, class: 'tag tag-check-box' })
+                    .text(tag.value)
+                    .appendTo(groupElement);
+
+                if (tag.checked) {
+                    element.addClass("checked");
+                    element.attr("style", "background-image: radial-gradient(" + group.color + " 3.5px, #0000 5px);")
+
+                    if (tag.important) {
+                        element.addClass("important");
+                    }
+                    if (tag.disabled) {
+                        element.addClass("disabled");
+                    }
+                }
+                else {
+                    element.attr("style", "background-image: radial-gradient(#0000 2px, " + group.color + " 3.5px, #0000 5px);");
+                }
+            });
+        });
+
+        
+        $(".tag-bar").html(this.getTagString(true));
+        
+        $(".tag")
+            .on("mousedown", ev => this.onTagCheckBoxClick(ev))
+            .on("contextmenu", () => false);
+    }
+
+
+    static getTagString(asHtml: boolean) {
+        let activeGroups = this.tagGroups.filter(group => 
+            group.tags.some(tag => 
+                tag.checked && (asHtml || !tag.disabled)
+            )
+        );
+
+        let texts = activeGroups.map(group => {
+            let activeTags = group.tags.filter(tag => 
+                tag.checked && (asHtml || !tag.disabled)
+            );
+            
+            let spanTexts = activeTags.map(tag => {
+                if (asHtml) {
+                    return this.tag2html(tag, group.color);
+                }
+                if (tag.important && !tag.parent?.isSentence) {
+                    return "(" + tag.value + ")";
+                }
+                return tag.value;
+            });
+
+            if (group.isSentence) {
+                var text = spanTexts.join(" ");
+                if (!asHtml && group.important) {
+                    text = "(" + text + ")";
+                }
+            }
+            else {
+                var text = spanTexts.join(", ");
+            }
+
+            if (group.isNegative) {
+                text = "<" + text + ">";
+            }
+            return text;
+        });
+        return texts.join(", ");
+    }
+
+
+    static tag2html(tag: Tag, color: string) {
+        let span = $("<span>", {
+            id: tag.id,
+            class: "tag",
+            style: `color: ${color}; background-color: ${color}1;`
+        });
+        span.text(tag.value);
+        if (tag.important) {
+            span.addClass("important");
+        }
+        if (tag.disabled) {
+            span.addClass("disabled");
+        }
+        return span.prop('outerHTML');
+    }
 }
 
 
 
 
-interface Tagish {
-    type: string;
-}
-
-interface Tag extends Tagish {
-    value: string;
+interface TagInfo {
     id: string;
-
-    checked?: boolean;
     important?: boolean;
     disabled?: boolean;
+}
+
+interface Tag extends TagInfo {
+    value: string;
+    checked?: boolean;
+    parent?: TagGroup;
+}
+
+interface TagGroup {
+    tags: Tag[];
+    color: string;
+    isSentence?: boolean;
+    isNegative?: boolean;
+    important?: boolean;
 }
 
 
