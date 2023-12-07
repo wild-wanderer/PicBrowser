@@ -154,7 +154,24 @@ html.no-js > body {
         width: 0;
         background-color: #181a1b;
         border-right: solid 1px #1c1c1c;
-        overflow: hidden;
+        overflow: auto;
+        
+        &::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+        &::-webkit-scrollbar-corner {
+            background: #0000;
+        }
+        &::-webkit-scrollbar-track {
+            -webkit-box-shadow: none;
+            background: #0000;
+        }
+        &::-webkit-scrollbar-thumb {
+            background-color: #313131;
+            outline: none;
+        }
+
 
         &:hover {
             min-width: 200px;
@@ -178,7 +195,7 @@ html.no-js > body {
 
 .editor-wrapper {
     padding-left: 10px;
-    padding-right: 100px;
+    padding-right: 10px;
     margin-bottom: 21px;
     background-color: #181a1b;
     border-top: solid 1px #1c1c1c;
@@ -190,6 +207,7 @@ html.no-js > body {
     .editor {
         width: 100%;
         padding: 0;
+        padding-right: 88px;
         border: none;
         resize: none;
         outline-width: 0px;
@@ -198,16 +216,14 @@ html.no-js > body {
     }
 
     .tag-bar {
-        height: 30px;
+        display: inline;
         line-height: 30px;
 
         span.tag {
-            padding: 2px 5px;
-            border-radius: 4px;
             cursor: pointer;
 
             &:hover {
-                color: white;
+                color: white !important;
             }
         }
     }

@@ -1,7 +1,7 @@
 const http = require('http');
 const fs = require('fs');
 const path = require('path');
-const { randomId } = require('../commons')
+const { randomId } = require('../opener/commons')
 // const ExifBuilder = require('exif').ExifBuilder;
 const cors = require('cors');
 const sharp = require('sharp');

@@ -19,10 +19,10 @@ class Main {
             .then(response => response.text())
             .then(html => this.domParser.parseFromString(html, 'text/html'))
             .then(overlay => $(overlay).find('.top-panel').appendTo($("body")));
-        
+
         $('.top-panel').on('focusout', ev => {
             console.log('Focus shift', ev.target, ev.relatedTarget);
-            
+
             let focusedEl = ev.relatedTarget as HTMLElement;
             let legitAncestor = focusedEl?.closest('.top-panel, #output-container');
             if (legitAncestor) {
@@ -35,9 +35,10 @@ class Main {
         });
 
         let editor = $('.editor') as JQuery<HTMLTextAreaElement>;
+        $(window).on('resize', () => this.resizeEditor(editor[0]));
         editor.on('input', () => this.resizeEditor(editor[0]));
         editor.on('keypress', ev => {
-            if (ev.key != "Enter") 
+            if (ev.key != "Enter")
                 return;
             this.startGenerator();
             ev.preventDefault();
@@ -54,16 +55,20 @@ class Main {
         $('.stop').on('click', this.stopGenerator);
         $('.minimize').on('click', this.minimize);
 
-        document.addEventListener("wheel", this.scroll, { passive: false });
+        $('.gallery')[0].addEventListener("wheel", this.scroll, { passive: false });
         document.body.addEventListener("keydown", this.onKeyDown);
 
         window.addEventListener("message", ev => {
             if (typeof ev.data !== 'string')
                 return;
-            if (!ev.data.startsWith('Img url: ')) 
+            if (!ev.data.startsWith('Img url: '))
                 return;
 
             this.appendImg(ev.data.substring(9));
+            if (!Main.running) {
+                let frame = ev.source as Window;
+                frame?.postMessage('Stop the loop', '*');
+            }
         });
     }
 
@@ -92,6 +97,7 @@ class Main {
         Main.running = false;
         document.querySelector('.top-panel')?.classList?.remove('running');
         let frames = document.querySelectorAll('iframe');
+
         frames.forEach(frame => {
             frame.contentWindow?.postMessage('Stop the loop', '*');
         });
@@ -144,7 +150,7 @@ class Main {
             return;
 
         switch (ev.key) {
-            case "Tab":   
+            case "Tab":
                 let editor = document.querySelector('.editor') as HTMLElement;
                 setTimeout(() => editor.focus(), 0);
                 break;
@@ -164,36 +170,36 @@ class Main {
                 img.classList?.add('hidden');
                 Main.hiddenImgs.push(img);
                 break;
-                    
-            default:    
+
+            default:
                 return;
         }
 
-        ev.preventDefault();   
+        ev.preventDefault();
     }
 
     static downloadImg(img: HTMLImageElement) {
         fetch('http://localhost:3000/upload', {
             method: 'POST',
-            headers: { 
-                'Content-Type': 'application/json' 
+            headers: {
+                'Content-Type': 'application/json'
             },
-            body: JSON.stringify({ 
-                imageBase64: img.src, 
-                comment: img.title 
+            body: JSON.stringify({
+                imageBase64: img.src,
+                comment: img.title
             }),
         })
-        .then((response) => {
-            if (response.ok) {
-                this.hideImg(img, true);
-            } else {
-                alert('Failed to save the image:' + response.status);
-            }
-        })
-        .catch((error) => {
-            console.error(error);
-            alert('An error occurred');
-        });
+            .then((response) => {
+                if (response.ok) {
+                    this.hideImg(img, true);
+                } else {
+                    alert('Failed to save the image:' + response.status);
+                }
+            })
+            .catch((error) => {
+                console.error(error);
+                alert('An error occurred');
+            });
     }
 
     static convertInput(inputString: string) {
@@ -371,27 +377,28 @@ class Main {
             });
         });
 
-        
+
         $(".tag-bar").html(this.getTagString(true));
-        
+
         $(".tag")
             .on("mousedown", ev => this.onTagCheckBoxClick(ev))
+            .on("mouseup", ev => ev.preventDefault())
             .on("contextmenu", () => false);
     }
 
 
     static getTagString(asHtml: boolean) {
-        let activeGroups = this.tagGroups.filter(group => 
-            group.tags.some(tag => 
+        let activeGroups = this.tagGroups.filter(group =>
+            group.tags.some(tag =>
                 tag.checked && (asHtml || !tag.disabled)
             )
         );
 
         let texts = activeGroups.map(group => {
-            let activeTags = group.tags.filter(tag => 
+            let activeTags = group.tags.filter(tag =>
                 tag.checked && (asHtml || !tag.disabled)
             );
-            
+
             let spanTexts = activeTags.map(tag => {
                 if (asHtml) {
                     return this.tag2html(tag, group.color);
@@ -425,7 +432,7 @@ class Main {
         let span = $("<span>", {
             id: tag.id,
             class: "tag",
-            style: `color: ${color}; background-color: ${color}1;`
+            style: `color: ${color};`
         });
         span.text(tag.value);
         if (tag.important) {

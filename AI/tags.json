@@ -1,25 +1,164 @@
 [
     {
-        "color": "#aa5",
+        "color": "#abed57",
         "tags": [
-            { "id": "Ej77lx", "value": "happy"       },
-            { "id": "3gbXOO", "value": "Siberian"    }
+            { "id": "v214Zl", "value": "happy"              },
+            { "id": "paWAtd", "value": "smiling"            },
+            { "id": "h6v5BS", "value": "laughing"           },
+            { "id": "wgB6nc", "value": "playful"            },
+            { "id": "fouuom", "value": "excited"            },
+            { "id": "atsn4p", "value": "curious"            },
+            { "id": "X5YLkG", "value": "mouth open"         },
+            { "id": "g6kYvU", "value": "joyful"                },
+            { "id": "tm1u5g", "value": "flirting"           }
         ]
     },
     {
-        "color": "#5aa",
+        "color": "#d35a90",
+        "tags": [
+            { "id": "UWlq1X", "value": "pretty"             },
+            { "id": "DP0SOI", "value": "beautiful"          },
+            { "id": "3FYD22", "value": "cute"               },
+            { "id": "sikiYr", "value": "sweet"              },
+            { "id": "XxYTzD", "value": "young"              },
+            { "id": "Tonqwp", "value": "adolescent"         },
+            { "id": "dp5sVk", "value": "teen"               },
+            { "id": "0uAybO", "value": "tween"              }
+        ]
+    },
+    {
+        "color": "#d35a90",
+        "tags": [
+            { "id": "NwqEow", "value": "girl"               },
+            { "id": "lKm1ed", "value": "girls"              },
+            { "id": "xP4B16", "value": "sisters"            },
+            { "id": "AXWDIp", "value": "girl friends"       }
+        ]
+    },
+    {
+        "color": "#7fffd1",
+        "tags": [
+            { "id": "r6QMbQ", "value": "freckles"           },
+            { "id": "oNMdT2", "value": "childish face"      },
+            { "id": "sjuaUm", "value": "young appearance"   },
+            { "id": "KTH8vf", "value": "slim"               },
+            { "id": "Bn8BYN", "value": "skinny"             },
+            { "id": "tA7urJ", "value": "short"              },
+            { "id": "Onz0zH", "value": "petite"             },
+            { "id": "S5xN3q", "value": "little"             },
+            { "id": "cvoyDv", "value": "small breast"       }
+        ]
+    },
+    {
+        "color": "#7fffd1",
         "isSentence": true,
         "tags": [
-            { "id": "3Mwaaq", "value": "husky"       },
-            { "id": "fyU7ou", "value": "boy"         }
+            { "id": "0doydd", "value": "long"               },
+            { "id": "DFPUXr", "value": "dark"               },
+            { "id": "0DgE1E", "value": "blond"              },
+            { "id": "6nHxEv", "value": "brown"              },
+            { "id": "1D6vL1", "value": "hair"               }
         ]
     },
     {
-        "color": "#a55",
+        "color": "#3bbdff",
+        "tags": [
+            { "id": "Gflbcu", "value": "night clothes"      },
+            { "id": "TDEyrP", "value": "tank top"           },
+            { "id": "Az6fvd", "value": "crop top"           },
+            { "id": "ljtBBV", "value": "skirt"              },
+            { "id": "DV2Qyu", "value": "stockings"          },
+            { "id": "8rbPhO", "value": "t-shirt dress"      }
+        ]
+    },
+    {
+        "color": "#3bbdff",
+        "tags": [
+            { "id": "hYkpma", "value": "swim suit"          },
+            { "id": "o9mhWp", "value": "thong"              },
+            { "id": "nuiYVw", "value": "boyshorts"          },
+            { "id": "KXbWbr", "value": "briefs"             },
+            { "id": "SuQy1R", "value": "bralette"           }
+        ]
+    },
+    {
+        "color": "#3bbdff",
+        "tags": [
+            { "id": "bZKs4f", "value": "nude"               },
+            { "id": "Km4J6H", "value": "bare breast"        },
+            { "id": "C7CtoZ", "value": "nipples"            },
+            { "id": "Is1Ke5", "value": "stripped"           }
+        ]
+    },
+    {
+        "color": "#3bbdff",
+        "tags": [
+            { "id": "oWOkDX", "value": "wrapped in towel"       },
+            { "id": "RIv35i", "value": "in bathrobe"            },
+            { "id": "vktYr7", "value": "uncovered shoulders"    },
+            { "id": "9NLPAE", "value": "unbuttoned"             },
+            { "id": "CD2sbI", "value": "decolletage"            }
+        ]
+    },
+    {
+        "color": "#f5c227",
+        "tags": [
+            { "id": "fZfvJD", "value": "taking bath"                    },
+            { "id": "rC72Fs", "value": "sharing a towel"                },
+            { "id": "a3uaq1", "value": "drying herself with towel"      },
+            { "id": "HOu8uU", "value": "cuddling"                       },
+            { "id": "1drptJ", "value": "hugging"                        },
+            { "id": "NWwnwc", "value": "embracing"                      },
+            { "id": "VFCMlB", "value": "touching"                       },
+            { "id": "EkkHWt", "value": "petting"                        },
+            { "id": "nIupHd", "value": "groping"                        },
+            { "id": "MquiFQ", "value": "palpating"                      },
+            { "id": "Y5bgY3", "value": "kissing"                        },
+            { "id": "h4GLYD", "value": "tickling"                       }
+        ]
+    },
+    {
+        "color": "#6debe1",
+        "tags": [
+            { "id": "KN9fA5", "value": "in forest"              },
+            { "id": "Iq7ShQ", "value": "in river"               },
+            { "id": "O1mXzl", "value": "in garden"              },
+            { "id": "Vyl6Ug", "value": "in sauna"               },
+            { "id": "wSAQ1R", "value": "in pool"                },
+            { "id": "teJIgo", "value": "in bathroom"            },
+            { "id": "JGG9hi", "value": "in bedroom"             },
+            { "id": "8YMHyP", "value": "on bed"                 }
+        ]
+    },
+    {
+        "color": "#ad6cff",
+        "tags": [
+            { "id": "UeRHzd", "value": "close-up shot"          },
+            { "id": "4cSsMR", "value": "photograph"             },
+            { "id": "x5NKak", "value": "photorealistic"         },
+            { "id": "jjo3UC", "value": "looking at the camera"  },
+            { "id": "hBL7yH", "value": "face and chest"         },
+            { "id": "iUBxp0", "value": "cropped to face"        }
+        ]
+    },
+    {
+        "color": "#c33",
         "isNegative": true,
         "tags": [
-            { "id": "SUv0Bl", "value": "fat"         },
-            { "id": "mZFaCo", "value": "ugly"        }
+            { "id": "LxlnLi", "value": "mature"                 },
+            { "id": "jiWcCV", "value": "adult"                  },
+            { "id": "QD8HHq", "value": "old"                    },
+            { "id": "6J5qBQ", "value": "ugly"                   },
+            { "id": "kftTBP", "value": "fat"                    },
+            { "id": "844MRH", "value": "makeup"                 },
+            { "id": "LjwCMA", "value": "Asian"                  },
+            { "id": "77DsOY", "value": "African"                },
+            { "id": "oq3lA9", "value": "Latino"                },
+            { "id": "FY2mxq", "value": "sad"                    },
+            { "id": "mTg75n", "value": "bored"                  },
+            { "id": "clHbbu", "value": "confused"               },
+            { "id": "UfYKzV", "value": "deformed"               },
+            { "id": "BtMQ5L", "value": "covered"                }
         ]
     }
 ]
