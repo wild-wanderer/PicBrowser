@@ -2,9 +2,13 @@ javascript:
 var pointerDisabled = false;
 
 
+let parser = new DOMParser();
+
+
 function init() {
     document.addEventListener('mousedown', onMouseDown);
     document.addEventListener('mouseup', onMouseUp);
+    openDevianArtPic();
 }
 
 
@@ -18,13 +22,16 @@ function onMouseDown(event) {
 
 
 /**@param {MouseEvent} event */
-function onMouseUp(event) {
+async function onMouseUp(event) {
     if (!pointerDisabled || event.button > 1)
         return;
 
     event.preventDefault();
     document.body.classList.remove('pointer-disabled');
     pointerDisabled = false;
+
+    if (await openDevianArtPost(event))
+        return;
 
     const pic = findPicture(event);
     if (!pic) {
@@ -204,6 +211,11 @@ function getLargeUrl(urlStr) {
         url.pathname = path.replace('/t/', '/i/');
     }
 
+    // Motherless
+    else if (host.endsWith("motherlessmedia.com")) {
+        url.href = url.href.replace(/\bthumbs\b/g, "images")
+    }
+
     // Shutter Stock
     else if (isShutterStockImg(host, path)) {
         const [match, id, ext] = /\-(\d+)(.\w{2,4})$/.exec(path);
@@ -215,6 +227,39 @@ function getLargeUrl(urlStr) {
     }
 
     return url.toString();
+}
+
+
+/**@param {MouseEvent} event */
+async function openDevianArtPost(event) {
+    if (!location.hostname.endsWith('.deviantart.com'))
+        return false;
+
+    let elements = document.elementsFromPoint(event.clientX, event.clientY);
+    let link = elements.find(el => el.tagName == "A");
+
+    if (link?.getAttribute('data-hook') != "deviation_link")
+        return false;
+
+    let href = link.href + "#PicOpener";
+
+    if (event.button === 0) 
+        location.href = href;
+    else 
+        window.open(href, '_blank');
+
+    return true;
+}
+
+
+async function openDevianArtPic() {
+    if (!location.hostname.endsWith('.deviantart.com'))
+        return;
+    if (location.hash != "#PicOpener")
+        return;
+
+    let img = document.querySelector('[data-hook="art_stage"] img');
+    location.href = img.src;
 }
 
 
